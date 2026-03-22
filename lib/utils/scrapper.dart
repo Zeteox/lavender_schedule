@@ -19,6 +19,10 @@ class Scrapper {
     return _instance!;
   }
 
+  String getApiUrl() {
+    return _apiUrl;
+  }
+
   void setApiUrl(String url) {
     _apiUrl = url;
   }

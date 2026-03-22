@@ -23,7 +23,7 @@ class _EditTaskPageState extends ConsumerState<EditTaskPage> {
     DateTime? picked = await showDatePicker(
       context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    if (picked != null) setState(() => _selectedDate = picked);
+    setState(() => _selectedDate = picked);
   }
 
   InputDecoration _customInputDecoration(String label, IconData icon) {

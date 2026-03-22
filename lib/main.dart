@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lavender_schedule/utils/scrapper.dart';
 import 'router/main.dart';
 
 void main() {
+  Scrapper.init("https://hp25.ynov.com/TOU/Telechargements/ical/Edt_DELPRAT.ics?version=2025.8.9&icalsecurise=8DB4E762E92AE5B045219AC821EC019539D424048D1CD4A5DE9D3C28B0A00EF48A260A6B1B440D6F388575898C3CFE9F&param=643d5b312e2e36325d2666683d3126663d31");
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       routerConfig: router,
-      title: 'Calendar App',
+      title: 'Lavender Schedule',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,

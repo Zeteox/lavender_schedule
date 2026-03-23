@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lavender_schedule/utils/dialog_utils.dart';
 import '../model/school_class.dart';
 import '../providers/task_provider.dart';
 import '../providers/class_provider.dart';
@@ -41,115 +42,6 @@ class _EditTaskPageState extends ConsumerState<EditTaskPage> {
     );
     if (picked != null) {
       setState(() => _selectedTime = picked);
-    }
-  }
-
-  Future<void> _showSearchDialog(List<SchoolClass> allCours, bool isRendu) async {
-    String searchQuery = '';
-
-    final result = await showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            Widget listContent;
-
-            if (isRendu) {
-              final uniqueModules = allCours
-                  .map((c) => c.subject)
-                  .toSet()
-                  .where((m) => m.toLowerCase().contains(searchQuery.toLowerCase()))
-                  .toList();
-
-              listContent = ListView.builder(
-                shrinkWrap: true,
-                itemCount: uniqueModules.length,
-                itemBuilder: (context, index) {
-                  final module = uniqueModules[index];
-                  return ListTile(
-                    title: Text(module, style: const TextStyle(color: Color(0xFFFFEFDC), fontWeight: FontWeight.bold)),
-                    onTap: () => Navigator.pop(context, module),
-                  );
-                },
-              );
-            } else {
-              final filteredCours = allCours
-                  .where((c) => c.subject.toLowerCase().contains(searchQuery.toLowerCase()))
-                  .toList()
-                ..sort((a, b) => a.start.compareTo(b.start));
-
-              listContent = ListView.builder(
-                shrinkWrap: true,
-                itemCount: filteredCours.length,
-                itemBuilder: (context, index) {
-                  final c = filteredCours[index];
-                  final startLocal = c.start.toLocal();
-                  final heureFr = "${startLocal.hour.toString().padLeft(2, '0')}h${startLocal.minute.toString().padLeft(2, '0')}";
-                  final dateFr = "Le ${startLocal.day.toString().padLeft(2, '0')}/${startLocal.month.toString().padLeft(2, '0')} à $heureFr";
-
-                  return ListTile(
-                    title: Text(c.subject, style: const TextStyle(color: Color(0xFFFFEFDC), fontWeight: FontWeight.bold)),
-                    subtitle: Text(dateFr, style: const TextStyle(color: Color(0xFFE7CCF5))),
-                    onTap: () => Navigator.pop(context, c),
-                  );
-                },
-              );
-            }
-
-            return Dialog(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: Color(0xFFE7CCF5), width: 1.5)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      isRendu ? "Rechercher une matière" : "Rechercher un cours",
-                      style: const TextStyle(color: Color(0xFFE7CCF5), fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      autofocus: true,
-                      style: const TextStyle(color: Color(0xFFFFEFDC)),
-                      decoration: InputDecoration(
-                        hintText: "Titre du cours...",
-                        hintStyle: const TextStyle(color: Colors.grey),
-                        prefixIcon: const Icon(Icons.search, color: Color(0xFFE7CCF5)),
-                        filled: true,
-                        fillColor: const Color(0xFF282828),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      ),
-                      onChanged: (val) => setDialogState(() => searchQuery = val),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Flexible(
-                      child: listContent,
-                    ),
-
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Annuler", style: TextStyle(color: Color(0xFF9155AB), fontWeight: FontWeight.bold)),
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    if (result != null) {
-      setState(() {
-        if (isRendu) {
-          _selectedModule = result as String;
-        } else {
-          _selectedSpecificClass = result as SchoolClass;
-        }
-      });
     }
   }
 
@@ -204,7 +96,15 @@ class _EditTaskPageState extends ConsumerState<EditTaskPage> {
                     const SizedBox(height: 16),
 
                     InkWell(
-                      onTap: () => _showSearchDialog(allCours, _type == "Rendu"),
+                      onTap: () => showSearchDialog(context, allCours, _type == "Rendu", (result) {
+                          setState(() {
+                            if (_type == "Rendu") {
+                              _selectedModule = result as String;
+                            } else {
+                              _selectedSpecificClass = result as SchoolClass;
+                            }
+                          });
+                        }),
                       child: InputDecorator(
                         decoration: _customInputDecoration(_type == "Rendu" ? "Lier à un Module" : "Lier à un Cours précis", _type == "Rendu" ? Icons.school : Icons.class_),
                         child: Text(

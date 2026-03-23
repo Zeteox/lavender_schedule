@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lavender_schedule/providers/alarm_settings_provider.dart';
 import 'package:lavender_schedule/providers/class_provider.dart';
+import 'package:lavender_schedule/utils/alarm_utils.dart';
 import 'package:lavender_schedule/utils/scrapper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/school_class.dart';
@@ -304,14 +305,16 @@ void showAlarmDialog(BuildContext context, TextEditingController urlController, 
                     backgroundColor: const Color(0xFF9155AB),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  onPressed: () {
-                    ref.read(alarmSettingsProvider.notifier).save(
-                      AlarmSettings(
-                        isActivated: alarmActivated,
-                        minutesBefore: selectedMinutesBefore,
-                      ),
+                  onPressed: () async {
+                    final newSettings = AlarmAppSettings(
+                      isActivated: alarmActivated,
+                      minutesBefore: selectedMinutesBefore,
                     );
-                    Navigator.of(context).pop();
+
+                    await ref.read(alarmSettingsProvider.notifier).save(newSettings);
+                    await scheduleAlarms(newSettings);
+
+                    if (context.mounted) Navigator.of(context).pop();
                   },
                   child: const Text("Enregistrer", style: TextStyle(color: Color(0xFFFFEFDC))),
                 ),

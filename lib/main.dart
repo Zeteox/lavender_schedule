@@ -1,23 +1,63 @@
+import 'dart:async';
+
+import 'package:alarm/alarm.dart';
+import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lavender_schedule/providers/alarm_settings_provider.dart';
+import 'package:lavender_schedule/ui/alarm_ring_page.dart';
+import 'package:lavender_schedule/utils/alarm_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lavender_schedule/utils/scrapper.dart';
 import 'router/main.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   final prefs = await SharedPreferences.getInstance();
   final savedUrl = prefs.getString('ics_url') ?? "";
-
   Scrapper.init(savedUrl);
+  await Alarm.init();
+
+  final savedSettings = AlarmAppSettings(
+    isActivated: prefs.getBool('alarm_activated') ?? false,
+    minutesBefore: prefs.getInt('alarm_minutes_before_class') ?? 30,
+  );
+  if (savedUrl.isNotEmpty) {
+    await scheduleAlarms(savedSettings);
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  StreamSubscription<AlarmSet>? _alarmSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _alarmSubscription = Alarm.ringing.listen((alarmSet) {
+      if (alarmSet.alarms.isEmpty) return;
+      router.routerDelegate.navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => AlarmRingPage(alarmSet: alarmSet),
+        ),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _alarmSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

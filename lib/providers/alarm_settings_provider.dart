@@ -1,50 +1,44 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AlarmSettings {
+class AlarmAppSettings {
   final bool isActivated;
   final int minutesBefore;
 
-  const AlarmSettings({
+  const AlarmAppSettings({
     this.isActivated = false,
     this.minutesBefore = 30,
   });
 
-  AlarmSettings copyWith({bool? isActivated, int? minutesBefore}) {
-    return AlarmSettings(
+  AlarmAppSettings copyWith({bool? isActivated, int? minutesBefore}) {
+    return AlarmAppSettings(
       isActivated: isActivated ?? this.isActivated,
       minutesBefore: minutesBefore ?? this.minutesBefore,
     );
   }
 }
 
-class AlarmSettingsNotifier extends AsyncNotifier<AlarmSettings> {
+class AlarmSettingsNotifier extends AsyncNotifier<AlarmAppSettings> {
   static const _keyActivated = 'alarm_activated';
   static const _keyMinutes = 'alarm_minutes_before_class';
 
   @override
-  Future<AlarmSettings> build() async {
+  Future<AlarmAppSettings> build() async {
     final prefs = await SharedPreferences.getInstance();
     final isActivated = prefs.getBool(_keyActivated) ?? false;
     final minutesBefore = prefs.getInt(_keyMinutes) ?? 30;
-    // Debug - vérifie ce qui est lu au démarrage
-    print("📖 LOADED: activated=$isActivated, minutes=$minutesBefore");
-    return AlarmSettings(isActivated: isActivated, minutesBefore: minutesBefore);
+    return AlarmAppSettings(isActivated: isActivated, minutesBefore: minutesBefore);
   }
 
-  Future<void> save(AlarmSettings settings) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool(_keyActivated, settings.isActivated);
-  await prefs.setInt(_keyMinutes, settings.minutesBefore);
-  state = AsyncData(settings);
-  // Debug - vérifie que ça s'écrit bien
-  print("✅ SAVED: activated=${settings.isActivated}, minutes=${settings.minutesBefore}");
-  // Relis immédiatement pour confirmer
-  print("✅ READ BACK: activated=${prefs.getBool(_keyActivated)}, minutes=${prefs.getInt(_keyMinutes)}");
-}
+  Future<void> save(AlarmAppSettings settings) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyActivated, settings.isActivated);
+    await prefs.setInt(_keyMinutes, settings.minutesBefore);
+    state = AsyncData(settings);
+  }
 }
 
 final alarmSettingsProvider =
-    AsyncNotifierProvider<AlarmSettingsNotifier, AlarmSettings>(
+    AsyncNotifierProvider<AlarmSettingsNotifier, AlarmAppSettings>(
   AlarmSettingsNotifier.new,
 );

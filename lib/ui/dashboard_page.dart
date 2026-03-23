@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lavender_schedule/utils/dialog_utils.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/task_provider.dart';
 import '../providers/class_provider.dart';
@@ -22,7 +22,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Scrapper.getInstance().getApiUrl().isEmpty) {
-        _showUrlDialog();
+        showUrlDialog(context, _urlController, ref);
       }
     });
   }
@@ -31,84 +31,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   void dispose() {
     _urlController.dispose();
     super.dispose();
-  }
-
-  void _showUrlDialog({bool canDismiss = false}) {
-    _urlController.text = Scrapper.getInstance().getApiUrl();
-
-    showDialog(
-      context: context,
-      barrierDismissible: canDismiss,
-      builder: (context) {
-        bool isSaving = false;
-        String? errorText;
-
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFE7CCF5), width: 1.5)),
-              title: const Row(
-                children: [
-                  Icon(Icons.calendar_month, color: Color(0xFFE7CCF5), size: 22),
-                  SizedBox(width: 10),
-                  Text("Configurer le planning", style: TextStyle(color: Color(0xFFE7CCF5), fontSize: 17, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Colle l'URL de ton fichier .ics pour synchroniser tes cours.", style: TextStyle(color: Color(0xFFFFEFDC), fontSize: 14)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _urlController,
-                    autofocus: true,
-                    keyboardType: TextInputType.url,
-                    style: const TextStyle(color: Color(0xFFFFEFDC)),
-                    decoration: InputDecoration(
-                      hintText: "https://ade.example.com/export.ics",
-                      hintStyle: const TextStyle(color: Color(0xFF888888)),
-                      errorText: errorText,
-                      filled: true,
-                      fillColor: const Color(0xFF282828),
-                      prefixIcon: const Icon(Icons.link, color: Color(0xFF9155AB), size: 20),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFF9155AB))),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE7CCF5), width: 2)),
-                      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.redAccent)),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                if (canDismiss)
-                  TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text("Annuler", style: TextStyle(color: Color(0xFF888888)))),
-                FilledButton(
-                  style: FilledButton.styleFrom(backgroundColor: const Color(0xFF9155AB), foregroundColor: const Color(0xFFFFEFDC), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                  onPressed: isSaving ? null : () async {
-                    final url = _urlController.text.trim();
-                    if (url.isEmpty || !url.startsWith('http')) {
-                      setDialogState(() => errorText = "Entre une URL valide (http/https)");
-                      return;
-                    }
-                    setDialogState(() { isSaving = true; errorText = null; });
-
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('ics_url', url);
-
-                    Scrapper.getInstance().setApiUrl(url);
-                    ref.read(coursProvider.notifier).refresh();
-
-                    if (context.mounted) Navigator.of(context).pop();
-                  },
-                  child: isSaving ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFFEFDC))) : const Text("Enregistrer"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
   }
 
   void _showTaskDetails(BuildContext context, Task task) {
@@ -149,7 +71,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       appBar: AppBar(
         title: const Text("Mon Dashboard"),
         actions: [
-          IconButton(icon: const Icon(Icons.settings_outlined), tooltip: "Changer l'URL .ics", onPressed: () => _showUrlDialog(canDismiss: true)),
+          IconButton(icon: const Icon(Icons.settings_outlined), tooltip: "Changer l'URL .ics", onPressed: () => showUrlDialog(context, _urlController, ref, canDismiss: true)),
         ],
       ),
       body: Scrapper.getInstance().getApiUrl().isEmpty

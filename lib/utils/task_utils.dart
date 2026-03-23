@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lavender_schedule/providers/task_provider.dart';
+import 'package:lavender_schedule/model/task.dart';
 
 void showTaskDetails(BuildContext context, Task task) {
 showDialog(

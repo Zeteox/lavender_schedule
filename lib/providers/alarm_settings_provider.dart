@@ -1,22 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lavender_schedule/model/alarm_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class AlarmAppSettings {
-  final bool isActivated;
-  final int minutesBefore;
-
-  const AlarmAppSettings({
-    this.isActivated = false,
-    this.minutesBefore = 30,
-  });
-
-  AlarmAppSettings copyWith({bool? isActivated, int? minutesBefore}) {
-    return AlarmAppSettings(
-      isActivated: isActivated ?? this.isActivated,
-      minutesBefore: minutesBefore ?? this.minutesBefore,
-    );
-  }
-}
 
 class AlarmSettingsNotifier extends AsyncNotifier<AlarmAppSettings> {
   static const _keyActivated = 'alarm_activated';

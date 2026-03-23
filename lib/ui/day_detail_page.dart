@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lavender_schedule/model/school_class.dart';
+import 'package:lavender_schedule/model/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/class_provider.dart';
 

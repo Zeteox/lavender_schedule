@@ -1,11 +1,10 @@
 import 'dart:async';
-
 import 'package:alarm/alarm.dart';
 import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lavender_schedule/providers/alarm_settings_provider.dart';
+import 'package:lavender_schedule/model/alarm_settings.dart';
 import 'package:lavender_schedule/ui/alarm_ring_page.dart';
 import 'package:lavender_schedule/utils/alarm_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,6 +1,6 @@
 import 'package:alarm/alarm.dart';
+import 'package:lavender_schedule/model/alarm_settings.dart';
 import 'package:lavender_schedule/model/school_class.dart';
-import 'package:lavender_schedule/providers/alarm_settings_provider.dart';
 import 'package:lavender_schedule/utils/scrapper.dart';
 
 Future<void> scheduleAlarms(AlarmAppSettings settings) async {

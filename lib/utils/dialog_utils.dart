@@ -5,9 +5,10 @@ import 'package:lavender_schedule/providers/class_provider.dart';
 import 'package:lavender_schedule/utils/alarm_utils.dart';
 import 'package:lavender_schedule/utils/scrapper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../model/alarm_settings.dart';
 import '../model/school_class.dart';
 
-Future<void> showSearchDialog(BuildContext context, List<SchoolClass> allCours, bool isRendu, Function(Object) onResult) async {
+Future<void> showSearchDialog(BuildContext context, List<SchoolClass> allClasses, bool isSubmission, Function(Object) onResult) async {
   String searchQuery = '';
 
   final result = await showDialog(
@@ -17,8 +18,8 @@ Future<void> showSearchDialog(BuildContext context, List<SchoolClass> allCours, 
         builder: (context, setDialogState) {
           Widget listContent;
 
-          if (isRendu) {
-            final uniqueModules = allCours
+          if (isSubmission) {
+            final uniqueModules = allClasses
                 .map((c) => c.subject)
                 .toSet()
                 .where((m) => m.toLowerCase().contains(searchQuery.toLowerCase()))
@@ -36,16 +37,16 @@ Future<void> showSearchDialog(BuildContext context, List<SchoolClass> allCours, 
               },
             );
           } else {
-            final filteredCours = allCours
+            final filteredClasses = allClasses
                 .where((c) => c.subject.toLowerCase().contains(searchQuery.toLowerCase()))
                 .toList()
               ..sort((a, b) => a.start.compareTo(b.start));
 
             listContent = ListView.builder(
               shrinkWrap: true,
-              itemCount: filteredCours.length,
+              itemCount: filteredClasses.length,
               itemBuilder: (context, index) {
-                final c = filteredCours[index];
+                final c = filteredClasses[index];
                 final startLocal = c.start.toLocal();
                 final heureFr = "${startLocal.hour.toString().padLeft(2, '0')}h${startLocal.minute.toString().padLeft(2, '0')}";
                 final dateFr = "Le ${startLocal.day.toString().padLeft(2, '0')}/${startLocal.month.toString().padLeft(2, '0')} à $heureFr";
@@ -68,7 +69,7 @@ Future<void> showSearchDialog(BuildContext context, List<SchoolClass> allCours, 
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    isRendu ? "Rechercher une matière" : "Rechercher un cours",
+                    isSubmission ? "Rechercher une matière" : "Rechercher un cours",
                     style: const TextStyle(color: Color(0xFFE7CCF5), fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -126,30 +127,32 @@ void showUrlDialog(BuildContext context, TextEditingController urlController, Wi
                 Text("Configurer le planning", style: TextStyle(color: Color(0xFFE7CCF5), fontSize: 17, fontWeight: FontWeight.bold)),
               ],
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Colle l'URL de ton fichier .ics pour synchroniser tes cours.", style: TextStyle(color: Color(0xFFFFEFDC), fontSize: 14)),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: urlController,
-                  autofocus: true,
-                  keyboardType: TextInputType.url,
-                  style: const TextStyle(color: Color(0xFFFFEFDC)),
-                  decoration: InputDecoration(
-                    hintText: "https://ade.example.com/export.ics",
-                    hintStyle: const TextStyle(color: Color(0xFF888888)),
-                    errorText: errorText,
-                    filled: true,
-                    fillColor: const Color(0xFF282828),
-                    prefixIcon: const Icon(Icons.link, color: Color(0xFF9155AB), size: 20),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFF9155AB))),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE7CCF5), width: 2)),
-                    errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.redAccent)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Colle l'URL de ton fichier .ics pour synchroniser tes cours.", style: TextStyle(color: Color(0xFFFFEFDC), fontSize: 14)),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: urlController,
+                    autofocus: true,
+                    keyboardType: TextInputType.url,
+                    style: const TextStyle(color: Color(0xFFFFEFDC)),
+                    decoration: InputDecoration(
+                      hintText: "https://ade.example.com/export.ics",
+                      hintStyle: const TextStyle(color: Color(0xFF888888)),
+                      errorText: errorText,
+                      filled: true,
+                      fillColor: const Color(0xFF282828),
+                      prefixIcon: const Icon(Icons.link, color: Color(0xFF9155AB), size: 20),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFF9155AB))),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE7CCF5), width: 2)),
+                      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.redAccent)),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             actions: [
               if (canDismiss)
@@ -168,7 +171,7 @@ void showUrlDialog(BuildContext context, TextEditingController urlController, Wi
                   await prefs.setString('ics_url', url);
 
                   Scrapper.getInstance().setApiUrl(url);
-                  ref.read(coursProvider.notifier).refresh();
+                  ref.read(classesProvider.notifier).refresh();
 
                   if (context.mounted) Navigator.of(context).pop();
                 },
@@ -209,91 +212,95 @@ void showAlarmDialog(BuildContext context, TextEditingController urlController, 
                   ),
                 ],
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Alarmes activées",
-                        style: TextStyle(color: Color(0xFFFFEFDC), fontSize: 14),
-                      ),
-                      Switch(
-                        value: alarmActivated,
-                        onChanged: (value) => setDialogState(() => alarmActivated = value),
-                      ),
-                    ],
-                  ),
-
-                  const Divider(color: Color(0xFF3A3A3A)),
-                  const SizedBox(height: 8),
-
-                  AnimatedOpacity(
-                    opacity: alarmActivated ? 1.0 : 0.3,
-                    duration: const Duration(milliseconds: 200),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          "Alarme avant le cours :",
-                          style: TextStyle(color: Color(0xFFE7CCF5), fontSize: 13, fontWeight: FontWeight.bold),
+                          "Alarmes activées",
+                          style: TextStyle(color: Color(0xFFFFEFDC), fontSize: 14),
                         ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [15, 30, 60, 120, 180, 240, 300].map((minutes) {
-                            final isSelected = selectedMinutesBefore == minutes;
-                            return GestureDetector(
-                              onTap: alarmActivated
-                                  ? () => setDialogState(() => selectedMinutesBefore = minutes)
-                                  : null,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? const Color(0xFF9155AB) : const Color(0xFF282828),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: isSelected ? const Color(0xFFE7CCF5) : const Color(0xFF3A3A3A),
-                                  ),
-                                ),
-                                child: Text(
-                                  minutes < 60 ? "${minutes}min" : "${minutes ~/ 60}h",
-                                  style: TextStyle(
-                                    color: isSelected ? const Color(0xFFFFEFDC) : const Color(0xFF888888),
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF282828),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF3A3A3A)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.info_outline, color: Color(0xFFE7CCF5), size: 16),
-                              const SizedBox(width: 8),
-                              Text(
-                                "Alarme ${selectedMinutesBefore < 60 ? '$selectedMinutesBefore minutes' : '${selectedMinutesBefore ~/ 60}h'} avant chaque cours",
-                                style: const TextStyle(color: Color(0xFFFFEFDC), fontSize: 12),
-                              ),
-                            ],
-                          ),
+                        Switch(
+                          value: alarmActivated,
+                          onChanged: (value) => setDialogState(() => alarmActivated = value),
                         ),
                       ],
                     ),
-                  ),
-                ],
+
+                    const Divider(color: Color(0xFF3A3A3A)),
+                    const SizedBox(height: 8),
+
+                    AnimatedOpacity(
+                      opacity: alarmActivated ? 1.0 : 0.3,
+                      duration: const Duration(milliseconds: 200),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Alarme avant le cours :",
+                            style: TextStyle(color: Color(0xFFE7CCF5), fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [15, 30, 60, 120, 180, 240, 300].map((minutes) {
+                              final isSelected = selectedMinutesBefore == minutes;
+                              return GestureDetector(
+                                onTap: alarmActivated
+                                    ? () => setDialogState(() => selectedMinutesBefore = minutes)
+                                    : null,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? const Color(0xFF9155AB) : const Color(0xFF282828),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: isSelected ? const Color(0xFFE7CCF5) : const Color(0xFF3A3A3A),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    minutes < 60 ? "${minutes}min" : "${minutes ~/ 60}h",
+                                    style: TextStyle(
+                                      color: isSelected ? const Color(0xFFFFEFDC) : const Color(0xFF888888),
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF282828),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFF3A3A3A)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.info_outline, color: Color(0xFFE7CCF5), size: 16),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    "Alarme ${selectedMinutesBefore < 60 ? '$selectedMinutesBefore minutes' : '${selectedMinutesBefore ~/ 60}h'} avant chaque cours",
+                                    style: const TextStyle(color: Color(0xFFFFEFDC), fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(

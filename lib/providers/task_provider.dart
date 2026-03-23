@@ -31,13 +31,14 @@ class TaskNotifier extends Notifier<List<Task>> {
     prefs.setString('saved_tasks', encoded);
   }
 
-  Future<void> cleanOldTasks(List<SchoolClass> allCours) async {
+  Future<void> cleanOldTasks(List<SchoolClass> allClasses) async {
     final now = DateTime.now();
     bool hasChanges = false;
 
+    // Remove items tied to classes/modules that have been inactive for more than 10 days.
     final updatedState = state.where((task) {
       if (task.type == "Rendu" && task.course != null) {
-        final moduleClasses = allCours.where((c) => c.subject == task.course);
+        final moduleClasses = allClasses.where((c) => c.subject == task.course);
         if (moduleClasses.isNotEmpty) {
           final latestClass = moduleClasses.reduce((a, b) => a.end.isAfter(b.end) ? a : b);
           if (now.difference(latestClass.end).inDays > 10) {

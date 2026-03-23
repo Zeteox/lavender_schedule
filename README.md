@@ -8,9 +8,7 @@
 ## 📝 Description
 
 **Lavender Schedule** is a cross-platform mobile application developed with Flutter, designed to help students organize their academic life.
-It centralizes key university information, offering a soothing, lavender-themed interface. Built with an offline-first approach, it allows users to manage their timetables, track academic deadlines, and manage their personal budget effectively.
-
-This project serves as a solid foundation for future evolutions, including cloud synchronization through the *lavenderAPI* ecosystem.
+It centralizes key university information, offering a soothing, lavender-themed interface. Built with an offline-first approach, it allows users to manage their timetables, track academic deadlines and alarms.
 
 ---
 

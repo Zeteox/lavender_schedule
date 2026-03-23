@@ -88,7 +88,7 @@ class Scrapper {
 
     final subject = parts['Matière'];
     final type = parts['Type'];
-    final roomsRaw = parts['Salles'];
+    final roomsRaw = parts['Salles'] ?? parts['Salle'];
     final teachersRaw = parts['Intervenants'] ?? parts['Intervenant'];
 
     if (subject == null || type == null) return null;

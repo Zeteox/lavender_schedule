@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lavender_schedule/utils/scrapper.dart';
 import 'router/main.dart';
 
-void main() {
-  Scrapper.init("");
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final prefs = await SharedPreferences.getInstance();
+  final savedUrl = prefs.getString('ics_url') ?? "";
+
+  Scrapper.init(savedUrl);
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -17,14 +25,22 @@ class MyApp extends StatelessWidget {
       routerConfig: router,
       title: 'Lavender Schedule',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('fr', 'FR'),
+      ],
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF282828), // Anthracite
+        scaffoldBackgroundColor: const Color(0xFF282828),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFE7CCF5),   // Lavande
-          secondary: Color(0xFF9155AB), // Violet foncé
+          primary: Color(0xFFE7CCF5),
+          secondary: Color(0xFF9155AB),
           surface: Color(0xFF282828),
-          onSurface: Color(0xFFFFEFDC), // Crème
+          onSurface: Color(0xFFFFEFDC),
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF282828),

@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../ui/splash_screen.dart';
 import '../ui/main_navigation_screen.dart';
 import '../ui/day_detail_page.dart';
+import '../model/school_class.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -16,7 +17,10 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/details',
-      builder: (context, state) => const DayDetailPage(),
+      builder: (context, state) {
+        final cours = state.extra as SchoolClass?;
+        return DayDetailPage(cours: cours);
+      },
     ),
   ],
 );

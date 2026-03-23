@@ -40,6 +40,7 @@ dependencies:
   shared_preferences: ^2.5.4
   flutter_localizations:
     sdk: flutter
+  alarm: ^5.2.1
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lavender_schedule/utils/dialog_utils.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lavender_schedule/utils/task_utils.dart';
 import '../providers/task_provider.dart';
 import '../providers/class_provider.dart';
 import '../model/school_class.dart';
@@ -33,31 +34,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     super.dispose();
   }
 
-  void _showTaskDetails(BuildContext context, Task task) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF282828),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFE7CCF5), width: 2)),
-        title: Text(task.title, style: const TextStyle(color: Color(0xFFE7CCF5), fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (task.course != null) Text("Matière : ${task.course}", style: const TextStyle(color: Color(0xFFFFEFDC), fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 12),
-            Text("Description :", style: TextStyle(color: const Color(0xFFFFEFDC).withValues(alpha: 0.7))),
-            const SizedBox(height: 4),
-            Text(task.description.isEmpty ? "Aucune description fournie." : task.description, style: const TextStyle(color: Color(0xFFFFEFDC), fontSize: 16)),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Fermer", style: TextStyle(color: Color(0xFF9155AB), fontWeight: FontWeight.bold)))
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final allTasks = ref.watch(taskProvider);
@@ -72,6 +48,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         title: const Text("Mon Dashboard"),
         actions: [
           IconButton(icon: const Icon(Icons.settings_outlined), tooltip: "Changer l'URL .ics", onPressed: () => showUrlDialog(context, _urlController, ref, canDismiss: true)),
+          IconButton(icon: const Icon(Icons.alarm), tooltip: "Parametres alarmes", onPressed: () => showAlarmDialog(context, _urlController, ref, canDismiss: true)),
         ],
       ),
       body: Scrapper.getInstance().getApiUrl().isEmpty
@@ -165,7 +142,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(color: const Color(0xFF282828), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFE7CCF5), width: 1.5)),
                         child: ListTile(
-                          onTap: () => _showTaskDetails(context, rendu),
+                          onTap: () => showTaskDetails(context, rendu),
                           leading: const Icon(Icons.assignment_late, color: Color(0xFFE7CCF5)),
                           title: Text(rendu.title, style: const TextStyle(color: Color(0xFFFFEFDC), fontWeight: FontWeight.bold)),
                           subtitle: Text(rendu.course ?? "Aucun cours", style: const TextStyle(color: Color(0xFFFFEFDC))),

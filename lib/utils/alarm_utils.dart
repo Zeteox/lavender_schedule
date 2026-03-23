@@ -4,6 +4,7 @@ import 'package:lavender_schedule/model/school_class.dart';
 import 'package:lavender_schedule/utils/scrapper.dart';
 
 Future<void> scheduleAlarms(AlarmAppSettings settings) async {
+  // Always clear previous alarms to avoid duplicates after a settings change.
   await Alarm.stopAll();
 
   if (!settings.isActivated) return;
@@ -24,8 +25,8 @@ Future<void> scheduleAlarms(AlarmAppSettings settings) async {
   }).toList();
 
   for (int i = 0; i < upcoming.length; i++) {
-    final cours = upcoming[i];
-    final alarmTime = cours.start.toLocal().subtract(Duration(minutes: settings.minutesBefore));
+    final schoolClass = upcoming[i];
+    final alarmTime = schoolClass.start.toLocal().subtract(Duration(minutes: settings.minutesBefore));
 
     await Alarm.set(
       alarmSettings: AlarmSettings(
@@ -37,15 +38,15 @@ Future<void> scheduleAlarms(AlarmAppSettings settings) async {
           volumeEnforced: true,
         ),
         notificationSettings: NotificationSettings(
-          title: cours.subject,
-          body: "Dans ${settings.minutesBefore} min • ${cours.rooms.join(', ')}",
+          title: schoolClass.subject,
+          body: "Dans ${settings.minutesBefore} min • ${schoolClass.rooms.join(', ')}",
           stopButton: "Arrêter",
           icon: 'notification_icon',
         ),
       ),
     );
 
-    print("Alarme programmée: ${cours.subject} à $alarmTime");
+    print("Alarme programmée: ${schoolClass.subject} à $alarmTime");
   }
 
   print("${upcoming.length} alarmes programmées");

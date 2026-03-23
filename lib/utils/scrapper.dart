@@ -40,6 +40,7 @@ class Scrapper {
   List<SchoolClass> _parseIcs(String icsContent) {
     final classes = <SchoolClass>[];
 
+    // Unfold folded ICS lines (RFC5545) before splitting by CRLF.
     final unfolded = icsContent
         .replaceAll('\r\n ', '')
         .replaceAll('\r\n\t', '');
@@ -78,6 +79,7 @@ class Scrapper {
   SchoolClass? _parseDescription(String desc, DateTime start, DateTime end) {
     final parts = <String, String>{};
 
+    // DESCRIPTION stores escaped line breaks, each segment is "key : value".
     for (final segment in desc.split(r'\n')) {
       final colonIndex = segment.indexOf(' : ');
       if (colonIndex == -1) continue;
@@ -119,6 +121,7 @@ class Scrapper {
     final value = line.split(':').last;
     final clean = value.replaceAll('Z', '');
 
+    // ICS date-only values use YYYYMMDD, datetime values use YYYYMMDDTHHMMSS.
     if (clean.length == 8) {
       return DateTime.utc(
         int.parse(clean.substring(0, 4)),

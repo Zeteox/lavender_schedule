@@ -18,8 +18,8 @@ final router = GoRouter(
     GoRoute(
       path: '/details',
       builder: (context, state) {
-        final cours = state.extra as SchoolClass?;
-        return DayDetailPage(cours: cours);
+        final schoolClass = state.extra as SchoolClass?;
+        return DayDetailPage(schoolClass: schoolClass);
       },
     ),
   ],

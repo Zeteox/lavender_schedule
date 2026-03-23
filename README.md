@@ -24,9 +24,6 @@ This project serves as a solid foundation for future evolutions, including cloud
     - Track assignments, projects, and exams
     - Link tasks to specific subjects or unique classes
     - Smart local notifications and pre-class alarms
-- **💰 Budget Tracking** *(Upcoming module)*
-    - Quick expense additions & customizable categories
-    - Monthly budgets and overspending alerts
 - **📊 Dashboard & Statistics**
     - Weekly class hours tracking and upcoming deadlines overview
     - Responsive layout adapted for both Mobile and Tablets
@@ -88,6 +85,8 @@ The project follows a modular and feature-oriented architecture:
 │       └── 🖼️ logo.png
 ├── 📁 lib/
 │   ├── 📁 model/               # Data structures
+│   │   ├── 📄 alarm_settings.dart
+│   │   ├── 📄 task.dart
 │   │   └── 📄 school_class.dart
 │   ├── 📁 providers/           # Riverpod state management
 │   │   ├── 📄 alarm_settings_provider.dart
@@ -101,9 +100,11 @@ The project follows a modular and feature-oriented architecture:
 │   │   ├── 📄 dashboard_page.dart
 │   │   ├── 📄 day_detail_page.dart
 │   │   ├── 📄 edit_task_page.dart
+│   │   ├── 📄 alarm_ring_page.dart
 │   │   ├── 📄 main_navigation_screen.dart
 │   │   └── 📄 splash_screen.dart
 │   ├── 📁 utils/               # Helpers and logic
+│   │   ├── 📄 alarm_utils.dart
 │   │   ├── 📄 dialog_utils.dart
 │   │   ├── 📄 scrapper.dart    # .ics parser
 │   │   └── 📄 task_utils.dart
@@ -115,9 +116,11 @@ The project follows a modular and feature-oriented architecture:
 ## 🎮 Usage
 1. Open the app and wait for the Splash Screen.
 2. On the Dashboard, click the gear icon to configure your schedule.
-3. Paste your .ics calendar URL (e.g., from Hyperplanning). The app will automatically fetch and parse your classes.
-4. Navigate to the Saisie tab to add assignments (Rendus) or notes to specific modules.
-5. Use the Planning tab to visualize your week, and tap any class to see its details and associated tasks.
+3. On the Dashboard, click the alarm icon to configure them.
+4. Paste your .ics calendar URL (e.g., from Hyperplanning). The app will automatically fetch and parse your classes.
+5. Navigate to the ``Saisie`` tab to add assignments to specific modules.
+6. Use the Planning tab to visualize your week, and tap any class to see its details and associated tasks.
+
 ---
 ## 📝 License
 

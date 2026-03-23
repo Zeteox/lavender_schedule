@@ -19,19 +19,22 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF9155AB),
+    return Scaffold(
+      backgroundColor: const Color(0xFF9155AB),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.school_rounded, size: 80, color: Color(0xFFFFEFDC)),
-            SizedBox(height: 24),
-            Text("Bienvenue", style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFFFFEFDC), letterSpacing: 1.5)),
-            SizedBox(height: 16),
-            Text("Préparation de vos informations...", style: TextStyle(fontSize: 16, color: Color(0xFFFFEFDC), fontStyle: FontStyle.italic)),
-            SizedBox(height: 40),
-            CircularProgressIndicator(color: Color(0xFFFFEFDC)),
+            Image.asset(
+              'assets/images/logo.png',
+              height: 150,
+            ),
+            const SizedBox(height: 24),
+            const Text("Bienvenue", style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFFFFEFDC), letterSpacing: 1.5)),
+            const SizedBox(height: 16),
+            const Text("Préparation de vos informations...", style: TextStyle(fontSize: 16, color: Color(0xFFFFEFDC), fontStyle: FontStyle.italic)),
+            const SizedBox(height: 40),
+            const CircularProgressIndicator(color: Color(0xFFFFEFDC)),
           ],
         ),
       ),

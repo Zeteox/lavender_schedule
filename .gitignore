@@ -6,7 +6,10 @@
 *.swp
 .buildlog/
 .history
+
+# IDE files
 .idea/
+.vscode/
 
 # Flutter repo-specific
 /bin/cache/
